@@ -58,6 +58,9 @@
         <label>Classes Attended:</label><br>
         <input type="number" id="attendedClasses"><br>
         
+        <label>Expected Total Classes:</label><br>
+        <input type="number" id="expectedClasses"><br>
+
         <label>Minimum Attendance Required (%):</label><br>
         <input type="number" id="minAttendance" value="75"><br>
         
@@ -66,28 +69,38 @@
         <div id="result"></div>
     </div>
     
-    
     <script>
-        function calculateBunks() {
-            let total = parseInt(document.getElementById('totalClasses').value);
-            let attended = parseInt(document.getElementById('attendedClasses').value);
-            let minReq = parseFloat(document.getElementById('minAttendance').value);
-            
-            if (isNaN(total) || isNaN(attended) || isNaN(minReq) || total < attended) {
-                document.getElementById('result').innerHTML = "Please enter valid numbers!";
-                return;
-            }
-            
-            let currentPercentage = (attended / total) * 100;
-            let maxBunks = Math.floor((attended - (minReq / 100) * total) / (minReq / 100 - 1));
-            let classesNeeded = Math.ceil((minReq / 100 * total - attended) / (1 - minReq / 100));
-            
-            if (currentPercentage >= minReq) {
-                document.getElementById('result').innerHTML = `You can bunk <b>${maxBunks}</b> more classes and stay above ${minReq}%`;
-            } else {
-                document.getElementById('result').innerHTML = `You need to attend <b>${classesNeeded}</b> more classes to reach ${minReq}%`;
-            }
-        }
+       function calculateBunks() {
+    let total = parseInt(document.getElementById('totalClasses').value);
+    let attended = parseInt(document.getElementById('attendedClasses').value);
+    let expectedTotal = parseInt(document.getElementById('expectedClasses').value);
+    let minReq = parseFloat(document.getElementById('minAttendance').value);
+    
+    if (isNaN(total) || isNaN(attended) || isNaN(minReq) || isNaN(expectedTotal) || total < attended || expectedTotal < total) {
+        document.getElementById('result').innerHTML = "Please enter valid numbers!";
+        return;
+    }
+
+    let currentPercentage = (attended / total) * 100;
+    let maxBunks = Math.floor((attended - (minReq / 100) * total) / (minReq / 100 - 1));
+    let classesNeededNow = Math.ceil((minReq / 100 * total - attended) / (1 - minReq / 100));
+    
+    // Total classes that must be attended to maintain minReq% in expectedTotal classes
+    let totalClassesToAttend = Math.ceil(minReq / 100 * expectedTotal);
+    
+    let resultText = "";
+    
+    if (currentPercentage >= minReq) {
+        resultText += `You can bunk <b>${maxBunks}</b> more classes and stay above ${minReq}%.<br>`;
+    } else {
+        resultText += `You need to attend <b>${classesNeededNow}</b> more classes to reach ${minReq}% now.<br>`;
+    }
+    
+    resultText += `To maintain ${minReq}% attendance for ${expectedTotal} total classes, you must attend <b>${totalClassesToAttend}</b> classes in total.`;
+
+    document.getElementById('result').innerHTML = resultText;
+}
+
     </script>
 </body>
 </html>
